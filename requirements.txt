@@ -1,0 +1,11 @@
+numpy
+torch
+torchvision
+lightning
+icecream
+jupyter
+pillow
+matplotlib
+streamlit
+streamlit-drawable-canvas
+boto3
