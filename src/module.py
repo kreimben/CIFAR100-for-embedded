@@ -3,14 +3,11 @@ import os
 import lightning as L
 import torch
 from torch import nn
-from torch.nn.utils import prune
 from torch.utils.data import DataLoader
 from torchmetrics import Accuracy
 from torchvision import datasets
-from torchvision.transforms import transforms
 
 from src.transform import training_transforms
-from src.utils import calculate_sparsity
 
 
 class ResidualBlock(nn.Module):
@@ -46,8 +43,7 @@ class ResidualBlock(nn.Module):
 
 
 class ResNet(L.LightningModule):
-    def __init__(self, block, layers, batch_size=2 ** 10, learning_rate=1e-5, device='cpu', quantize=False,
-                 prune=False):
+    def __init__(self, block, layers, batch_size=2 ** 10, learning_rate=1e-5, device='cpu', quantize=False):
         super(ResNet, self).__init__()
         self.save_hyperparameters()
 
@@ -166,6 +162,3 @@ class ResNet(L.LightningModule):
         acc = self.accuracy(outputs, labels)
         self.log('test_loss', loss, prog_bar=True)
         self.log('test_acc', acc, prog_bar=True)
-
-    def on_train_epoch_end(self):
-        if self.hparams.prune: self.log('sparsity', calculate_sparsity(self))
