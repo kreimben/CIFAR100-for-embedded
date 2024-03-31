@@ -10,7 +10,7 @@ transform_test = transforms.Compose([
 ])
 
 dataset = datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test)
-dataset = torch.utils.data.random_split(dataset, [.99, .01])[1]
+dataset = torch.utils.data.random_split(dataset, [len(dataset) - 100, 100])[1]
 dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 
 
