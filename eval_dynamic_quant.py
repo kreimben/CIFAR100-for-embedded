@@ -1,20 +1,22 @@
 import torch
 from torch import nn
+from torch.ao.quantization import quantize_dynamic
 from torchvision import models
 
 from eval import evaluate, dataloader
 
-dic = torch.load('quantized_resnet_cifar100.pth', map_location="cpu")
+dic = torch.load('resnet_cifar100.pth', map_location="cpu")
 
 quantized_model = models.resnet50(weights=None)
 quantized_model.fc = nn.Linear(quantized_model.fc.in_features, 100)
-# quantized_model.load_state_dict(dic)
-quantized_model.eval()  # Set the model to inference mode
-quantized_model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
-quantized_model = torch.quantization.convert(quantized_model, inplace=True)
+quantized_model.load_state_dict(dic)
+
+quantized_model = quantize_dynamic(quantized_model, dtype=torch.qint8)
 
 
-# print(torch.load('quantized_resnet_cifar100.pth', map_location="cpu"))
+# quantized_model.eval()  # Set the model to inference mode
+# quantized_model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+# quantized_model = torch.quantization.convert(quantized_model, inplace=True)
 
 
 def calibrate_quantization(model, test_dataloader):
