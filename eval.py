@@ -33,7 +33,7 @@ transform_test = transforms.Compose([
 
 dataset = datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test)
 dataset = torch.utils.data.random_split(dataset, [.99, .01])[1]
-dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 
 
 def evaluate(model, test_dataloader, model_name):
