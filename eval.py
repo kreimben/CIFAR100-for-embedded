@@ -31,9 +31,9 @@ transform_test = transforms.Compose([
     transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761)),
 ])
 
-test_dataset = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
-test_dataset = torch.utils.data.random_split(test_dataset, [.99, .01])[1]
-test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False)
+dataset = datasets.CIFAR100(root='./data', train=True, download=True, transform=transform_test)
+dataset = torch.utils.data.random_split(dataset, [.99, .01])[1]
+dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
 
 
 def evaluate(model, test_dataloader, model_name):
@@ -49,15 +49,14 @@ def evaluate(model, test_dataloader, model_name):
 
             correct_predictions += (pred_y.argmax(1) == y).type(torch.float).sum().item()
 
-            end_time = time.time()
-            total_time += end_time - start_time
+            total_time += (time.time() - start_time) * 1000
             total_batches += 1
             print(f'{i + 1} / {len(test_dataloader)} done.', end='\r')
 
         accuracy = correct_predictions / len(test_dataloader.dataset)
 
         print(
-            f"Average Inference Time of {model_name} per 1 dataset: {total_time / total_batches:.3f} seconds, "
+            f"Average Inference Time of {model_name} per 1 dataset: {total_time / total_batches:.3f} ms, "
             f"{model_name.capitalize()} accuracy: {accuracy * 100:.3f}%."
         )
 
@@ -72,7 +71,7 @@ def calibrate_quantization(model, test_dataloader):
             i += 1
 
 
-evaluate(model, test_dataloader, 'normal model')
-evaluate(pruned_model, test_dataloader, 'pruned model')
-calibrate_quantization(quantized_model, test_dataloader)
-evaluate(quantized_model, test_dataloader, 'quantized model')
+evaluate(model, dataloader, 'normal model')
+evaluate(pruned_model, dataloader, 'pruned model')
+calibrate_quantization(quantized_model, dataloader)
+evaluate(quantized_model, dataloader, 'quantized model')
