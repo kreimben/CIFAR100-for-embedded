@@ -32,7 +32,8 @@ transform_test = transforms.Compose([
 ])
 
 test_dataset = datasets.CIFAR100(root='./data', train=False, download=True, transform=transform_test)
-test_dataloader = DataLoader(test_dataset, batch_size=512, shuffle=False)
+test_dataset = torch.utils.data.random_split(test_dataset, [.99, .01])[1]
+test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False)
 
 
 def evaluate(model, test_dataloader, model_name):
@@ -56,7 +57,7 @@ def evaluate(model, test_dataloader, model_name):
         accuracy = correct_predictions / len(test_dataloader.dataset)
 
         print(
-            f"Average Inference Time of {model_name} per 1 dataset: {total_time / total_batches / 512:.3f} seconds, "
+            f"Average Inference Time of {model_name} per 1 dataset: {total_time / total_batches:.3f} seconds, "
             f"{model_name.capitalize()} accuracy: {accuracy * 100:.3f}%."
         )
 
