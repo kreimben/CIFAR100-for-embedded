@@ -55,10 +55,10 @@ def evaluate(model, test_dataloader, model_name):
 
         accuracy = correct_predictions / len(test_dataloader.dataset)
 
-    print(
-        f"Average Inference Time of {model_name} per 1 dataset: {total_time / total_batches / 512:.3f} seconds, "
-        f"{model_name.capitalize()} accuracy: {accuracy * 100:.3f}%."
-    )
+        print(
+            f"Average Inference Time of {model_name} per 1 dataset: {total_time / total_batches / 512:.3f} seconds, "
+            f"{model_name.capitalize()} accuracy: {accuracy * 100:.3f}%."
+        )
 
 
 def calibrate_quantization(model, test_dataloader):
