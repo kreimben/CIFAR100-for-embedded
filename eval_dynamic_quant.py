@@ -14,11 +14,6 @@ quantized_model.load_state_dict(dic)
 quantized_model = quantize_dynamic(quantized_model, dtype=torch.qint8)
 
 
-# quantized_model.eval()  # Set the model to inference mode
-# quantized_model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
-# quantized_model = torch.quantization.convert(quantized_model, inplace=True)
-
-
 def calibrate_quantization(model, test_dataloader):
     # Run calibration
     i = 0
@@ -30,4 +25,4 @@ def calibrate_quantization(model, test_dataloader):
 
 
 calibrate_quantization(quantized_model, dataloader)
-evaluate(quantized_model, dataloader, 'quantized model')
+evaluate(quantized_model, dataloader, 'dynamic quantized model')
