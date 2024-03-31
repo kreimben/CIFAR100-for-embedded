@@ -67,7 +67,7 @@ def calibrate_quantization(model, test_dataloader):
     with torch.no_grad():
         for inputs, _ in test_dataloader:
             model(inputs)
-            print(f'{i + 1}  / {len(test_dataloader)} done.', end='\r')
+            print(f'[Calibrating] {i + 1}  / {len(test_dataloader)} done.', end='\r')
             i += 1
 
 
