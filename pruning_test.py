@@ -12,20 +12,19 @@ model = models.resnet50(weights=None)
 model.fc = nn.Linear(model.fc.in_features, 100)
 model.load_state_dict(model_dict)
 model.eval()  # Set the model to inference mode
-print(f'Sparsity of normal model is: {calculate_sparsity(model) * 100:.3f}%')
 
 pruned_model_dict = torch.load("pruned_model.pth", map_location=torch.device('cpu'))
 pruned_model = models.resnet50(weights=None)
-pruned_model.fc = nn.Linear(model.fc.in_features, 100)
+pruned_model.fc = nn.Linear(pruned_model.fc.in_features, 100)
 pruned_model.load_state_dict(pruned_model_dict)
 pruned_model.eval()  # Set the model to inference mode
 print(f'Sparsity of pruned model is: {calculate_sparsity(pruned_model) * 100:.3f}%')
 
-# quantized_model_dict = torch.load("quantized_resnet_cifar100.pth", map_location=torch.device('cpu'))
-# quantized_model = models.resnet50(weights=None)
-# quantized_model.load_state_dict(quantized_model_dict)
-# quantized_model.fc = nn.Linear(model.fc.in_features, 100)
-# quantized_model.eval()  # Set the model to inference mode
+quantized_model = models.resnet50(weights=None)
+quantized_model.fc = nn.Linear(quantized_model.fc.in_features, 100)
+quantized_model.eval()  # Set the model to inference mode
+quantized_model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+quantized_model = torch.quantization.prepare(model, inplace=True)
 
 transform_test = transforms.Compose([
     transforms.ToTensor(),
@@ -58,11 +57,21 @@ def evaluate(model, test_dataloader, model_name):
 
     print(
         f"Average Inference Time of {model_name} per 1 dataset: {total_time / total_batches / 512:.3f} seconds, "
-        f"{model_name.capitalize()} accuracy: {accuracy * 100:.6f}%."
+        f"{model_name.capitalize()} accuracy: {accuracy * 100:.3f}%."
     )
-    print()
+
+
+def calibrate_quantization(model, test_dataloader):
+    # Run calibration
+    i = 0
+    with torch.no_grad():
+        for inputs, _ in test_dataloader:
+            model(inputs)
+            print(f'{i + 1}  / {len(test_dataloader)} done.', end='\r')
+            i += 1
 
 
 evaluate(model, test_dataloader, 'normal model')
 evaluate(pruned_model, test_dataloader, 'pruned model')
-print(f'Sparsity of pruned model is: {calculate_sparsity(pruned_model) * 100:.3f}%')
+calibrate_quantization(quantized_model, test_dataloader)
+evaluate(quantized_model, test_dataloader, 'quantized model')
